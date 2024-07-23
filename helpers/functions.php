@@ -105,7 +105,10 @@ function getOhMetadata($collectionId){
 	
 	$record=get_record_by_id($modelName="Collection", $recordId=$collectionId);
 
-	$description = metadata($record, array('Dublin Core', 'Description'));
+	if(metadata($record, array('Dublin Core', 'Description'))){
+        $description = metadata($record, array('Dublin Core', 'Description'));
+
+    }
 	$title=metadata($record, array('Dublin Core', 'Title'));
 
 	$md["title"]=$title;
