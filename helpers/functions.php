@@ -23,6 +23,7 @@ function getPiologs(){
 		array($collectionId, $elementId)
 	);
 	$result = $stmt->fetchAll();
+	//var_dump($result);
 
 	$output="";
 	$dates=array();
@@ -30,63 +31,99 @@ function getPiologs(){
 	$ids=array();
 	$links=array();
 	
+
+
+	$academicYears=[];
+	
 	foreach ($result as $row) {
 		$date=$row["text"];
 		$itemId=$row["record_id"];
 		$itemLink = "/items/show/$itemId";
 		$year=explode("-", $date)[0];
-		//$link="/items/browse?advanced%5B0%5D%5Belement_id%5D=92&advanced%5B0%5D%5Btype%5D=is+exactly&advanced%5B0%5D%5Bterms%5D=$url_text";
-		  //$html="<a href='/items/browse?search=$url_text&query_type=exact_match&record_types[]=Item'>$text</a> <br /><br />";
+		$month=explode("-", $date)[1];
+
+		if((int)$month >=1 && (int)$month <=6){
+			# it's spring!
+			$lastYear=$year-1;
+			$range=$lastYear."-".$year;
+			if(!in_array($range, $academicYears)){
+				$academicYears[]=$range;
+			}
+
+		}
+		if((int)$month >=8 && (int)$month <=12){
+			# it's fall!
+			$nextYear=$year+1;
+			$range=$year."-".$nextYear;
+			if(!in_array($range, $academicYears)){
+				$academicYears[]=$range;
+			}
+
+		}
+
+
 		  array_push($dates, $date);
 		  array_push($years,$year);
 		  array_push($ids, $itemId);
 		  array_push($links,$itemLink);
 	}
-
+  //var_dump($academicYears);
 	array_multisort($dates, SORT_DESC,$years, $ids, $links);
 	$c=count($dates);
 	$yearsUnique=array_unique($years, SORT_REGULAR);
+//echo $c;
+//var_dump($yearsUnique);
+
+	rsort($academicYears);
+	//var_dump($academicYears);
+
+	foreach($academicYears as $ay){
+
+		$pieces=explode("-", $ay);
+		$fallYear=$pieces[0];
+		$springYear=$pieces[1];
 
 
-	foreach ($yearsUnique as $year) {
-		$springYear=strval($year);
-		$fallYear = strval($year - 1);
-	$output .= '<div class="card mb-3 bg-color-1 home border-0">
-	<div class="card-body">
-	  <h5 class="card-title"></h5>
-	  <p class="card-text"></p>
-	  <div class="accordion" id="appt'.$fallYear.'">
-		<div class="accordion-item">
-		  <h2 class="accordion-header" id="apptHeading'.$fallYear.' - '.$springYear.'">
-			<button class="accordion-button home collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apptCollapse'.$fallYear.'" aria-expanded="false" aria-controls="apptCollapse'.$year.'">
-			  '.$fallYear.' - '.$springYear.'
-			</button>
-		  </h2>
-		  <div id="apptCollapse'.$fallYear.'" class="accordion-collapse collapse" aria-labelledby="apptHeading'.$fallYear.'" data-bs-parent="#appt'.$fallYear.'">
-			<div class="accordion-body">';
-	$issues = "";
-	for ($i = 0; $i < $c; $i++) {
-		$date=$dates[$i];
-		$month = explode('-', $date)[1];
-		if (($years[$i] == intval($fallYear) and (intval($month) >= 8 and intval($month) <= 12))
-		or ($years[$i] == intval($springYear) and (intval($month) >= 1 and intval($month) <= 7))) {
-		$link=$links[$i];
-		$parts=explode("-", $date);
-		$yyyy=$parts[0];
-		$mm=$parts[1];
-		$dd=$parts[2];
-		$formattedDate=date("F, Y", mktime(0, 0, 0, $mm, $dd, $yyyy)); 
-		$html = "<a href='$link'>$formattedDate</a> <br /><br />";
-		$issues .= $html;
-		}
-	}
-	$output.= $issues;
-	$output .=	'</div>
-		  </div>
+			$output .= '<div class="card mb-3 bg-color-1 home border-0">
+			<div class="card-body">
+			<h5 class="card-title"></h5>
+			<p class="card-text"></p>
+			<div class="accordion" id="appt'.$fallYear.'">
+				<div class="accordion-item">
+				<h2 class="accordion-header" id="apptHeading'.$fallYear.' - '.$springYear.'">
+					<button class="accordion-button home collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apptCollapse'.$fallYear.'" aria-expanded="false" aria-controls="apptCollapse'.$year.'">
+					'.$fallYear.' - '.$springYear.'
+					</button>
+				</h2>
+				<div id="apptCollapse'.$fallYear.'" class="accordion-collapse collapse" aria-labelledby="apptHeading'.$fallYear.'" data-bs-parent="#appt'.$fallYear.'">
+					<div class="accordion-body">';
+			$issues = "";
+			for ($i = 0; $i < $c; $i++) {
+				$date=$dates[$i];
+				$month = explode('-', $date)[1];
+				if (($years[$i] == intval($fallYear) and (intval($month) >= 8 and intval($month) <= 12))
+				or ($years[$i] == intval($springYear) and (intval($month) >= 1 and intval($month) <= 7))) {
+					$link=$links[$i];
+					$parts=explode("-", $date);
+					$yyyy=$parts[0];
+					$mm=$parts[1];
+					$dd=$parts[2];
+					$formattedDate=date("F, Y", mktime(0, 0, 0, $mm, $dd, $yyyy)); 
+					$html = "<a href='$link'>$formattedDate</a> <br /><br />";
+					$issues .= $html;
+				}
+			}
+			$output.= $issues;
+			$output .=	'</div>
+				</div>
+				</div>
+			</div>
 		</div>
-	</div>
-  </div>
-</div>';
+		</div>';
+
+
+
+	
 	}
 
 

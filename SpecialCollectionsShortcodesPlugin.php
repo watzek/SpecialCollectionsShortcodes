@@ -45,7 +45,7 @@ class SpecialCollectionsShortcodesPlugin extends Omeka_Plugin_AbstractPlugin{
 
 
     public function oralHistoriesShortcode($args, $view){
-        $collectionId=41;
+        $collectionId=57;
         $ohMetadata=getOhMetadata($collectionId);
         $title=$ohMetadata["title"];
         $description=$ohMetadata["description"];
